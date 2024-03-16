@@ -1,1 +1,189 @@
+#include <Servo.h>
+#include <AFMotor.h>
+#define Speed 100
+#define Echo_f A0
+#define Trig_f A1
+#define Echo_l A2
+#define Trig_l A3
+#define Echo_r A4
+#define Trig_r A5
+#define spoint 103
+#define motor 10
+#define back 13
+AF_DCMotor M1(1);
+AF_DCMotor M2(2);
+AF_DCMotor M3(3);
+AF_DCMotor M4(4);
+int pos;
+int dist_f=100,dist_l=100,dist_r=100;
+Servo servo;
+void setup()
+{
+  pinMode(Trig_f, OUTPUT);
+  pinMode(Echo_f, INPUT);
+  pinMode(Trig_l, OUTPUT);
+  pinMode(Echo_l, INPUT);
+  pinMode(Trig_r, OUTPUT);
+  pinMode(Echo_r, INPUT);
+  pinMode(back,OUTPUT);
+  servo.attach(motor);
+  M1.setSpeed(Speed);
+  M2.setSpeed(Speed);
+  M3.setSpeed(Speed);
+  M4.setSpeed(Speed);
+
+}
+void loop(){
+
+  dist_f = ultrasonic_f();
+  dist_l = ultrasonic_l();
+  dist_r = ultrasonic_r();
+  if (dist_f <= 15) {
+    Stop();
+    delay(800);
+      digitalWrite(back,HIGH);
+    backward();
+    delay(1000);
+    Stop();
+      digitalWrite(back,LOW);
+    delay(500);
+    dist_l = ultrasonic_l();
+    dist_r = ultrasonic_r();
+    if(dist_l>dist_r)
+    {
+      forward();
+      left();
+      delay(500);
+      Stop();
+      servo.write(spoint);
+      delay(500);
+        digitalWrite(back,HIGH);
+      backward();
+      right();
+      delay(500);
+      Stop();
+       digitalWrite(back,LOW);
+      delay(500);
+      servo.write(spoint);
+      pos=spoint;
+  }
+  else
+  {
+      forward();
+      right();
+      delay(500);
+      Stop();
+      servo.write(spoint);
+      delay(800);
+       digitalWrite(back,HIGH);
+      backward();
+      left();
+      delay(500);
+      Stop();
+      digitalWrite(back,LOW);
+      delay(500);
+      servo.write(spoint);
+      pos=spoint;
+  }
+
+  }
+else if(dist_l<=8)
+  {
+    
+    forward();
+    sright(dist_l);
+  } 
+else if(dist_r<=8)
+  {
+    
+    forward();
+    sleft(dist_r);
+  }
+else {
+    
+    servo.write(spoint);
+    pos=spoint;
+    forward();
+  }
+}
+int ultrasonic_f() {
+  digitalWrite(Trig_f, LOW);
+  delayMicroseconds(4);
+  digitalWrite(Trig_f, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(Trig_f, LOW);
+  long t = pulseIn(Echo_f, HIGH);
+  long cm = t / 29 / 2; 
+  return cm;
+}
+int ultrasonic_l() {
+  digitalWrite(Trig_l, LOW);
+  delayMicroseconds(4);
+  digitalWrite(Trig_l, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(Trig_l, LOW);
+  long t = pulseIn(Echo_l, HIGH);
+  long cm = t / 29 / 2; //time convert distance
+  return cm;
+}
+int ultrasonic_r() {
+  digitalWrite(Trig_r, LOW);
+  delayMicroseconds(4);
+  digitalWrite(Trig_r, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(Trig_r, LOW);
+  long t = pulseIn(Echo_r, HIGH);
+  long cm = t / 29 / 2; //time convert distance
+  return cm;
+}
+void forward() {
+  M1.run(FORWARD);
+  M2.run(FORWARD);
+  M3.run(FORWARD);
+  M4.run(FORWARD);
+}
+void backward() {
+
+  M1.run(BACKWARD);
+  M2.run(BACKWARD);
+  M3.run(BACKWARD);
+  M4.run(BACKWARD);
+
+}
+void Stop() {
+  M1.run(RELEASE);
+  M2.run(RELEASE);
+  M3.run(RELEASE);
+  M4.run(RELEASE);
+}
+void right() {
+  servo.write(20);
+  delay(800);
+}
+void left() {
+  servo.write(180);
+  delay(800);
+
+}
+void sright(int d) {
+  int turn=20+(8*d);
+  for(int i=pos;i>turn;i-=1)
+  {
+  servo.write(i);
+  delay(6);
+  }
+  pos=turn;
+
+}
+void sleft(int d) {
+  int turn=180-(8*d);
+  for(int i=pos;i<turn;i+=1)
+  {
+  servo.write(i);
+  delay(6);
+  }
+  pos=turn;
+ 
+
+}
 
